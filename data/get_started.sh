@@ -12,4 +12,4 @@ mv ./UTKFace/61_1_20170109150557335.jpg.chip.jpg ./UTKFace/61_1_3_20170109150557
 mv ./UTKFace/61_1_20170109142408075.jpg.chip.jpg ./UTKFace/61_1_1_20170109142408075.jpg.chip.jpg
 
 echo 'Starting pre-processing....'
-python data_analysis.py
+python pre_process.py
