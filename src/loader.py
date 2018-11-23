@@ -23,7 +23,7 @@ AVAILABLE_ATTR = [
     "Narrow_Eyes", "No_Beard", "Oval_Face", "Pale_Skin", "Pointy_Nose",
     "Receding_Hairline", "Rosy_Cheeks", "Sideburns", "Smiling", "Straight_Hair",
     "Wavy_Hair", "Wearing_Earrings", "Wearing_Hat", "Wearing_Lipstick",
-    "Wearing_Necklace", "Wearing_Necktie", "Young", "Race"
+    "Wearing_Necklace", "Wearing_Necktie", "Young"
 ]
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
@@ -67,8 +67,8 @@ def load_images(params):
         valid_index = 15000
         test_index = 20000
     else:
-        train_index = 18967
-        valid_index = 18967 + 2371
+        train_index = 162770
+        valid_index = 162770 + 19867
         test_index = len(images)
     train_images = images[:train_index]
     valid_images = images[train_index:valid_index]
@@ -119,14 +119,14 @@ class DataSampler(object):
         idx = torch.LongTensor(bs).random_(len(self.images))
 
         # select images / attributes
-        batch_x = normalize_images(self.images.index_select(0, idx))
-        batch_y = self.attributes.index_select(0, idx)
+        batch_x = normalize_images(self.images.index_select(0, idx).cuda())
+        batch_y = self.attributes.index_select(0, idx).cuda()
 
         # data augmentation
         if self.v_flip and np.random.rand() <= 0.5:
-            batch_x = batch_x.index_select(2, torch.arange(batch_x.size(2) - 1, -1, -1).long())
+            batch_x = batch_x.index_select(2, torch.arange(batch_x.size(2) - 1, -1, -1).long().cuda())
         if self.h_flip and np.random.rand() <= 0.5:
-            batch_x = batch_x.index_select(3, torch.arange(batch_x.size(3) - 1, -1, -1).long())
+            batch_x = batch_x.index_select(3, torch.arange(batch_x.size(3) - 1, -1, -1).long().cuda())
 
         return Variable(batch_x, volatile=False), Variable(batch_y, volatile=False)
 
@@ -135,6 +135,6 @@ class DataSampler(object):
         Get a batch of images in a range with their attributes.
         """
         assert i < j
-        batch_x = normalize_images(self.images[i:j])
-        batch_y = self.attributes[i:j]
+        batch_x = normalize_images(self.images[i:j].cuda())
+        batch_y = self.attributes[i:j].cuda()
         return Variable(batch_x, volatile=True), Variable(batch_y, volatile=True)
