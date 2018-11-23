@@ -23,7 +23,7 @@ AVAILABLE_ATTR = [
     "Narrow_Eyes", "No_Beard", "Oval_Face", "Pale_Skin", "Pointy_Nose",
     "Receding_Hairline", "Rosy_Cheeks", "Sideburns", "Smiling", "Straight_Hair",
     "Wavy_Hair", "Wearing_Earrings", "Wearing_Hat", "Wearing_Lipstick",
-    "Wearing_Necklace", "Wearing_Necktie", "Young"
+    "Wearing_Necklace", "Wearing_Necktie", "Young", "Race"
 ]
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
