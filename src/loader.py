@@ -67,8 +67,8 @@ def load_images(params):
         valid_index = 15000
         test_index = 20000
     else:
-        train_index = 162770
-        valid_index = 162770 + 19867
+        train_index = 18967
+        valid_index = 18967 + 2371
         test_index = len(images)
     train_images = images[:train_index]
     valid_images = images[train_index:valid_index]
