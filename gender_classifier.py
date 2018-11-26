@@ -1,3 +1,4 @@
+# from __future__ import print_funtion
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -6,10 +7,9 @@ import argparse
 from sklearn.model_selection import train_test_split
 from collections import Counter
 import numpy as np
-import cPickle as pickle
+import _pickle as pickle
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
-from __future__ import print_funtion
 
 
 class SimpleCNN(nn.Module):
