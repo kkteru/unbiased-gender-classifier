@@ -12,6 +12,13 @@ from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 
 
+def normalize_images(images):
+    """
+    Normalize image values.
+    """
+    return images.float().div_(255.0).mul_(2.0).add_(-1)
+
+
 class SimpleCNN(nn.Module):
     def __init__(self, num_classes=2):
         super(SimpleCNN, self).__init__()
@@ -80,7 +87,7 @@ class Exp():
             num_iterations = X_test_.shape[0] // args.batch_size + 1
         predictions = []
         for i in range(num_iterations):
-            image = torch.FloatTensor(X_test_[i * args.batch_size:(i + 1) * args.batch_size, :, :, :])
+            image = normalize_images(X_test_[i * args.batch_size:(i + 1) * args.batch_size, :, :, :])
             image = image.to(device)
 
             # Predict classes using images from the test set
@@ -117,7 +124,7 @@ class Exp():
             num_iterations = X_test_.shape[0] // self.args.batch_size + 1
         predictions = []
         for i in range(num_iterations):
-            image = torch.FloatTensor(X_test_[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :])
+            image = normalize_images(X_test_[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :])
             label = torch.LongTensor(y_test_[i * self.args.batch_size:(i + 1) * self.args.batch_size])
             image = image.to(device)
             label = label.to(device)
@@ -149,7 +156,7 @@ class Exp():
             num_iterations = self.X_train.shape[0] // args.batch_size
             print('Epoch: ' + str(epoch + 1) + ' / ' + str(num_epochs))
             for i in tqdm(range(num_iterations)):
-                image = torch.FloatTensor(self.X_train[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :])
+                image = normalize_images(self.X_train[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :])
                 label = torch.LongTensor(self.y_train[i * self.args.batch_size:(i + 1) * self.args.batch_size])
                 image = image.to(device)
                 label = label.to(device)
@@ -234,7 +241,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    images = torch.load(os.path.join(args.data, 'images_256_256.pth')).float().numpy()
+    images = torch.load(os.path.join(args.data, 'images_256_256.pth'))
     print('Shape of images loaded : ' + str(images.shape))
     attributes = torch.load(os.path.join(args.data, 'attributes.pth'))
     gender_attributes = torch.LongTensor(attributes['Gender']).numpy()
