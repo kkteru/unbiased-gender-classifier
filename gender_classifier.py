@@ -243,7 +243,7 @@ if __name__ == '__main__':
     cnt = Counter(race_attributes)
     print(cnt)
 
-    per_race_items_test = int(race_attributes.shape[0] * .2) / 5
+    per_race_items_test = int(race_attributes.shape[0] * .2 / 5)
     val_items = int(race_attributes.shape[0] * .1)
     np.random.seed(args.seed)
 
