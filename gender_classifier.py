@@ -10,12 +10,10 @@ import numpy as np
 import _pickle as pickle
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
+from src.model import AutoEncoder
 
 
 def normalize_images(images):
-    """
-    Normalize image values.
-    """
     return images.float().div_(255.0).mul_(2.0).add_(-1)
 
 
@@ -77,8 +75,9 @@ class Exp():
         self.y_val = y_val
 
     def get_predictions(self, data):
-        model = torch.load(open(self.args.model_loc, 'rb'))
+        model = torch.load(open(self.args.model_loc, 'rb')).to(device)
         model.eval()
+
         X_test_ = data
         test_acc = 0.0
         if X_test_.shape[0] % args.batch_size == 0:
@@ -90,6 +89,10 @@ class Exp():
             image = normalize_images(X_test_[i * args.batch_size:(i + 1) * args.batch_size, :, :, :])
             image = image.to(device)
 
+            if self.args.encode_image:
+                model_ae = torch.load(args.ae).to(device)
+                model_ae.eval()
+                image = model_ae.encode(image)[-1]
             # Predict classes using images from the test set
             outputs = model(image)
 
@@ -112,7 +115,7 @@ class Exp():
             a.append(accuracy_score(y, pred))
         return a
 
-    def evaluate(self, model, data):
+    def evaluate(self, model, data, model_ae=None):
         model.eval()
 
         X_test_ = data[0]
@@ -129,6 +132,8 @@ class Exp():
             image = image.to(device)
             label = label.to(device)
 
+            if self.args.encode_image:
+                image = model_ae.encode(image)[-1]
             # Predict classes using images from the test set
             outputs = model(image)
 
@@ -140,7 +145,7 @@ class Exp():
         print(" Accuracy: {} ".format(accuracy_score(y_test_, predictions)))
         return accuracy_score(y_test_, predictions)
 
-    def train(self, model, num_epochs):
+    def train(self, model, num_epochs, model_ae=None):
         loss_fn = nn.CrossEntropyLoss()
 
         best_acc = 0.0
@@ -161,6 +166,8 @@ class Exp():
                 image = image.to(device)
                 label = label.to(device)
 
+                if self.args.encode_image:
+                    image = model_ae.encode(image)[-1]
                 # Clear all accumulated gradients
                 optimizer.zero_grad()
                 # Predict classes using images from the test set
@@ -201,8 +208,8 @@ class Exp():
                 break
             # Print the metrics
 
-    def run(self, model):
-        self.train(model, self.args.num_epochs)
+    def run(self, model, model_ae=None):
+        self.train(model, self.args.num_epochs, model_ae)
         print('Test')
         model = torch.load(open('model.pth', 'rb'))
         self.evaluate(model, (self.X_test, self.y_test))
@@ -234,8 +241,12 @@ if __name__ == '__main__':
                         help='Load and store data')
     parser.add_argument('--eval', action='store_true',
                         help='Load and store data')
+    parser.add_argument('--encode_image', action='store_true',
+                        help='Encode image to remove race info before passing to the classifier')
     parser.add_argument('--cuda', action='store_true',
                         help='Use CUDA')
+    parser.add_argument("--ae", type=str, default="./models/best_accu_ae.pth",
+                        help="Path to autoencoder model")
     # parser.add_argument('--out-dir', type=str, default='../data/wikitext-2/annotated',
     #                     help='location of the output directory')
 
@@ -302,6 +313,9 @@ if __name__ == '__main__':
     model = SimpleCNN(args.num_classes)
     model.to(device)
 
+    model_ae = torch.load(args.ae).to(device)
+    model_ae.eval()
+
     e = Exp(args, X_train, X_test, X_val, y_train, y_test, y_val)
 
     if args.eval:
@@ -315,7 +329,7 @@ if __name__ == '__main__':
             print('*' * 89)
             print('Run ' + str(i + 1))
 
-            e.run(model)
+            e.run(model, model_ae)
 
             print('-' * 89)
             predictions = e.get_predictions(X_test)
@@ -329,4 +343,4 @@ if __name__ == '__main__':
         for c in range(5):
             print('For class ' + str(c) + ' Mean Accuracy = ' + str(mean_perf[c]))
     else:
-        e.run(model)
+        e.run(model, model_ae)
