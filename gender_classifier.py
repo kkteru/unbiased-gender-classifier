@@ -149,7 +149,7 @@ class Exp():
             num_iterations = self.X_train.shape[0] // args.batch_size
             print('Epoch: ' + str(epoch + 1) + ' / ' + str(num_epochs))
             for i in tqdm(range(num_iterations)):
-                image = self.X_train[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :]
+                image = torch.FloatTensor(self.X_train[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :])
                 label = torch.LongTensor(self.y_train[i * self.args.batch_size:(i + 1) * self.args.batch_size])
                 image = image.to(device)
                 label = label.to(device)
@@ -234,7 +234,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    images = torch.load(os.path.join(args.data, 'images_256_256.pth'))
+    images = torch.load(os.path.join(args.data, 'images_256_256.pth')).float().numpy()
     print('Shape of images loaded : ' + str(images.shape))
     attributes = torch.load(os.path.join(args.data, 'attributes.pth'))
     gender_attributes = torch.LongTensor(attributes['Gender']).numpy()
