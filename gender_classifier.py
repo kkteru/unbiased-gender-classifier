@@ -9,7 +9,7 @@ import numpy as np
 import cPickle as pickle
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
-
+from __future__ import print_funtion
 
 
 class SimpleCNN(nn.Module):
@@ -59,9 +59,8 @@ class SimpleCNN(nn.Module):
         return output
 
 
-
 class Exp():
-    def __init__(self, args,  X_train, X_test, X_val, y_train, y_test, y_val):
+    def __init__(self, args, X_train, X_test, X_val, y_train, y_test, y_val):
         self.args = args
         self.X_train = X_train
         self.X_test = X_test
@@ -81,7 +80,7 @@ class Exp():
             num_iterations = X_test_.shape[0] // args.batch_size + 1
         predictions = []
         for i in range(num_iterations):
-            image = torch.FloatTensor(X_test_[i*args.batch_size:(i+1)*args.batch_size, :, :, :])
+            image = torch.FloatTensor(X_test_[i * args.batch_size:(i + 1) * args.batch_size, :, :, :])
             image = image.to(device)
 
             # Predict classes using images from the test set
@@ -97,15 +96,14 @@ class Exp():
     def evaluate_classwise(self, predictions, race_test, gender_test):
         a = []
         for c in range(5):
-            c_idxs = np.where(race_test==c)[0]
+            c_idxs = np.where(race_test == c)[0]
             # print predictions
             # print c_idxs
             pred = predictions[c_idxs.astype(int)]
             y = gender_test[c_idxs]
-            print 'For class ' + str(c)  + ' Accuracy = ' + str(accuracy_score(y, pred))
+            print('For class ' + str(c) + ' Accuracy = ' + str(accuracy_score(y, pred)))
             a.append(accuracy_score(y, pred))
         return a
-
 
     def evaluate(self, model, data):
         model.eval()
@@ -119,8 +117,8 @@ class Exp():
             num_iterations = X_test_.shape[0] // self.args.batch_size + 1
         predictions = []
         for i in range(num_iterations):
-            image = torch.FloatTensor(X_test_[i*self.args.batch_size:(i+1)*self.args.batch_size, :, :, :])
-            label = torch.LongTensor(y_test_[i*self.args.batch_size:(i+1)*self.args.batch_size])
+            image = torch.FloatTensor(X_test_[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :])
+            label = torch.LongTensor(y_test_[i * self.args.batch_size:(i + 1) * self.args.batch_size])
             image = image.to(device)
             label = label.to(device)
 
@@ -151,8 +149,8 @@ class Exp():
             num_iterations = self.X_train.shape[0] // args.batch_size
             print('Epoch: ' + str(epoch + 1) + ' / ' + str(num_epochs))
             for i in tqdm(range(num_iterations)):
-                image = torch.FloatTensor(self.X_train[i*self.args.batch_size:(i+1)*self.args.batch_size, :, :, :])
-                label = torch.LongTensor(self.y_train[i*self.args.batch_size:(i+1)*self.args.batch_size])
+                image = torch.FloatTensor(self.X_train[i * self.args.batch_size:(i + 1) * self.args.batch_size, :, :, :])
+                label = torch.LongTensor(self.y_train[i * self.args.batch_size:(i + 1) * self.args.batch_size])
                 image = image.to(device)
                 label = label.to(device)
 
@@ -170,14 +168,14 @@ class Exp():
 
                 train_loss += loss.item() * image.size(0)
                 _, prediction = torch.max(outputs.data, 1)
-                train_acc += float(torch.sum(prediction == label.data))/float(label.size(0))
+                train_acc += float(torch.sum(prediction == label.data)) / float(label.size(0))
                 if i % args.log_interval == 0:
-                    print("Iteration {}, Train Accuracy: {} , TrainLoss: {}".format(i+1, train_acc/float(i+1), train_loss/float(i+1),))
+                    print("Iteration {}, Train Accuracy: {} , TrainLoss: {}".format(i + 1, train_acc / float(i + 1), train_loss / float(i + 1),))
             # # Call the learning rate adjustment function
             # adjust_learning_rate(epoch)
 
             # Compute the average acc and loss over all 50000 training images
-            print 'Validation'
+            print('Validation')
             val_acc = self.evaluate(model, (self.X_val, self.y_val))
             # Evaluate on the test set
             # test_acc = test()
@@ -186,7 +184,7 @@ class Exp():
             if val_acc >= best_acc:
                 torch.save(model, open('model.pth', 'wb'))
                 best_acc = val_acc
-                print 'Saved model'
+                print('Saved model')
             else:
                 patience += 1
                 if lr > 0.00001:
@@ -198,9 +196,10 @@ class Exp():
 
     def run(self, model):
         self.train(model, self.args.num_epochs)
-        print 'Test'
+        print('Test')
         model = torch.load(open('model.pth', 'rb'))
         self.evaluate(model, (self.X_test, self.y_test))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Race Classifier')
@@ -242,20 +241,19 @@ if __name__ == '__main__':
     print('Shape of attributes loaded : ' + str(gender_attributes.shape))
     race_attributes = torch.LongTensor(attributes['Race']).numpy()
     cnt = Counter(race_attributes)
-    print cnt
+    print(cnt)
 
-    per_race_items_test = int(race_attributes.shape[0]*.2)/5
-    val_items = int(race_attributes.shape[0]*.1)
+    per_race_items_test = int(race_attributes.shape[0] * .2) / 5
+    val_items = int(race_attributes.shape[0] * .1)
     np.random.seed(args.seed)
 
     all_indices = np.arange(race_attributes.shape[0])
 
     test_indices = []
     for c in range(5):
-        c_idxs = np.where(race_attributes==c)[0]
+        c_idxs = np.where(race_attributes == c)[0]
         c_idxs = np.random.choice(c_idxs, per_race_items_test, replace=False)
         test_indices.extend(c_idxs)
-
 
     all_indices = np.arange(race_attributes.shape[0])
     train_indices = list(set(all_indices) - set(test_indices))
@@ -276,7 +274,7 @@ if __name__ == '__main__':
     race_test = race_attributes[test_indices]
 
     cnt = Counter(race_test)
-    print cnt
+    print(cnt)
 
     if not os.path.isfile('image_test.pb'):
         pickle.dump(X_test, open('image_test.pb', 'wb'))
@@ -290,7 +288,7 @@ if __name__ == '__main__':
         if torch.cuda.is_available():
             torch.cuda.manual_seed(args.seed)
         else:
-            print 'CUDA not found'
+            print('CUDA not found')
 
     device = torch.device("cuda:" + str(args.gpu) if args.cuda and torch.cuda.is_available() else "cpu")
     # device = torch.device("cpu")
@@ -301,27 +299,27 @@ if __name__ == '__main__':
 
     if args.eval:
         predictions = e.get_predictions(X_test)
-        print 'Overall Accuracy = ' + str(accuracy_score(y_test, predictions))
+        print('Overall Accuracy = ' + str(accuracy_score(y_test, predictions)))
         a = e.evaluate_classwise(predictions, race_test, y_test)
 
     elif args.train_and_eval:
         all_perf = []
         for i in tqdm(range(args.num_runs)):
-            print '*'*89
-            print 'Run ' + str(i+1)
+            print('*' * 89)
+            print('Run ' + str(i + 1))
 
             e.run(model)
 
-            print '-'*89
+            print('-' * 89)
             predictions = e.get_predictions(X_test)
-            print 'Overall Accuracy = ' + str(accuracy_score(y_test, predictions))
+            print('Overall Accuracy = ' + str(accuracy_score(y_test, predictions)))
             a = e.evaluate_classwise(predictions, race_test, y_test)
             all_perf.append(a)
 
-        print '#'*89
+        print('#' * 89)
         all_perf = np.array(all_perf)
         mean_perf = np.mean(all_perf, axis=0)
         for c in range(5):
-            print 'For class ' + str(c)  + ' Mean Accuracy = ' + str(mean_perf[c])
+            print('For class ' + str(c) + ' Mean Accuracy = ' + str(mean_perf[c]))
     else:
         e.run(model)
