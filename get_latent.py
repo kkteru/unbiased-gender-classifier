@@ -43,14 +43,18 @@ def get_params():
 
 def main():
     params = get_params()
+    print('Loading images...')
     images = torch.load(os.path.join(DATA_PATH, params.images_filename))
+    print('Normalizing images...')
     images_norm = normalize_images(images)
 
+    print('Loading model...')
     ae = torch.load(params.ae).eval()
+    print('Encoding images...')
     images_encoded = ae.encode(images_norm)
 
     print("Saving encoded images to %s ..." % DATA_PATH)
-    torch.save(images_encoded, 'images_512_4_4.pth')
+    torch.save(images_encoded[-1], 'images_512_4_4.pth')
 
 
 if __name__ == '__main__':
