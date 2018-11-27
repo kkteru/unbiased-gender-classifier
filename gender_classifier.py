@@ -58,6 +58,7 @@ class SimpleCNN(nn.Module):
         output = self.conv4_bn(self.conv4(output))
         output = self.relu4(output)
 
+        # print(output.shape)
         output = output.view(-1, 2 * 2 * 24)
 
         output = self.drop(self.fc(output))
@@ -348,7 +349,8 @@ if __name__ == '__main__':
         print('#' * 89)
         all_perf = np.array(all_perf)
         mean_perf = np.mean(all_perf, axis=0)
+        std_perf = np.std(all_perf, axis=0)
         for c in range(5):
-            print('For class ' + str(c) + ' Mean Accuracy = ' + str(mean_perf[c]))
+            print('For class ' + str(c) + ' Mean Accuracy = ' + str(mean_perf[c]) + '+/-' + str(std_perf[c]))
     else:
         e.run(model, model_ae)
