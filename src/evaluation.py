@@ -207,16 +207,17 @@ class Evaluator(object):
 
         # classifier accuracy
         log_clf = []
-        clf_accu = self.eval_clf_accuracy()
-        k = 0
-        log_clf += [('clf_accu', np.mean(clf_accu))]
-        for name, n_cat in params.attr:
-            log_clf.append(('clf_accu_%s' % name, float(np.mean(clf_accu[k:k + n_cat]))))
-            log_clf.extend([('clf_accu_%s_%i' % (name, j), float(clf_accu[k + j]))
-                            for j in range(n_cat)])
-            k += n_cat
-        logger.info('Classifier accuracy:')
-        print_accuracies(log_clf)
+        if params.n_lat_dis:
+            clf_accu = self.eval_clf_accuracy()
+            k = 0
+            log_clf += [('clf_accu', np.mean(clf_accu))]
+            for name, n_cat in params.attr:
+                log_clf.append(('clf_accu_%s' % name, float(np.mean(clf_accu[k:k + n_cat]))))
+                log_clf.extend([('clf_accu_%s_%i' % (name, j), float(clf_accu[k + j]))
+                                for j in range(n_cat)])
+                k += n_cat
+            logger.info('Classifier accuracy:')
+            print_accuracies(log_clf)
 
         # log autoencoder loss
         logger.info('Autoencoder loss: %.5f' % ae_loss)

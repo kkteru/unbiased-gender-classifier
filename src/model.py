@@ -135,6 +135,64 @@ class AutoEncoder(nn.Module):
         return enc_outputs, dec_outputs
 
 
+class AutoEncoder_vanilla(nn.Module):
+
+    def __init__(self, params):
+        super(AutoEncoder_vanilla, self).__init__()
+
+        self.img_sz = params.img_sz
+        self.img_fm = params.img_fm
+        self.instance_norm = params.instance_norm
+        self.init_fm = params.init_fm
+        self.max_fm = params.max_fm
+        self.n_layers = params.n_layers
+        self.n_skip = params.n_skip
+        self.deconv_method = params.deconv_method
+        self.dropout = params.dec_dropout
+        self.attr = params.attr
+
+        enc_layers, dec_layers = build_layers(self.img_sz, self.img_fm, self.init_fm,
+                                              self.max_fm, self.n_layers, 0,
+                                              self.n_skip, self.deconv_method,
+                                              self.instance_norm, 0, self.dropout)
+        self.enc_layers = nn.ModuleList(enc_layers)
+        self.dec_layers = nn.ModuleList(dec_layers)
+
+    def encode(self, x):
+        assert x.size()[1:] == (self.img_fm, self.img_sz, self.img_sz)
+
+        enc_outputs = [x]
+        for layer in self.enc_layers:
+            enc_outputs.append(layer(enc_outputs[-1]))
+
+        assert len(enc_outputs) == self.n_layers + 1
+        return enc_outputs
+
+    def decode(self, enc_outputs, y):
+        bs = enc_outputs[0].size(0)
+        assert len(enc_outputs) == self.n_layers + 1
+
+        dec_outputs = [enc_outputs[-1]]
+        for i, layer in enumerate(self.dec_layers):
+            size = dec_outputs[-1].size(2)
+            # attributes
+            input = [dec_outputs[-1]]
+            # skip connection
+            if 0 < i <= self.n_skip:
+                input.append(enc_outputs[-1 - i])
+            input = torch.cat(input, 1)
+            dec_outputs.append(layer(input))
+
+        assert len(dec_outputs) == self.n_layers + 1
+        assert dec_outputs[-1].size() == (bs, self.img_fm, self.img_sz, self.img_sz)
+        return dec_outputs
+
+    def forward(self, x, y):
+        enc_outputs = self.encode(x)
+        dec_outputs = self.decode(enc_outputs, y)
+        return enc_outputs, dec_outputs
+
+
 class LatentDiscriminator(nn.Module):
 
     def __init__(self, params):

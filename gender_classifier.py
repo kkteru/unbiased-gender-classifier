@@ -90,10 +90,14 @@ class Exp():
             image = normalize_images(X_test_[i * args.batch_size:(i + 1) * args.batch_size, :, :, :])
             image = image.to(device)
 
-            if self.args.encode_image:
+            if args.remove_race:
                 model_ae = torch.load(args.ae).to(device)
-                model_ae.eval()
-                image = model_ae.encode(image)[-1]
+            else:
+                model_ae = torch.load(args.ae_vanilla).to(device)
+            model_ae.eval()
+
+            image = model_ae.encode(image)[-1]
+
             # Predict classes using images from the test set
             outputs = model(image)
 
@@ -133,8 +137,7 @@ class Exp():
             image = image.to(device)
             label = label.to(device)
 
-            if self.args.encode_image:
-                image = model_ae.encode(image)[-1]
+            image = model_ae.encode(image)[-1]
             # Predict classes using images from the test set
             outputs = model(image)
 
@@ -167,8 +170,7 @@ class Exp():
                 image = image.to(device)
                 label = label.to(device)
 
-                if self.args.encode_image:
-                    image = model_ae.encode(image)[-1]
+                image = model_ae.encode(image)[-1]
                 # Clear all accumulated gradients
                 optimizer.zero_grad()
                 # Predict classes using images from the test set
@@ -242,11 +244,13 @@ if __name__ == '__main__':
                         help='Load and store data')
     parser.add_argument('--eval', action='store_true',
                         help='Load and store data')
-    parser.add_argument('--encode-image', action='store_true',
+    parser.add_argument('--remove_race', action='store_true',
                         help='Encode image to remove race info before passing to the classifier')
     parser.add_argument('--cuda', action='store_true',
                         help='Use CUDA')
     parser.add_argument("--ae", type=str, default="./models/best_accu_ae.pth",
+                        help="Path to autoencoder model")
+    parser.add_argument("--ae_vanilla", type=str, default="./models/best_rec_ae.pth",
                         help="Path to autoencoder model")
     # parser.add_argument('--out-dir', type=str, default='../data/wikitext-2/annotated',
     #                     help='location of the output directory')
@@ -314,11 +318,12 @@ if __name__ == '__main__':
     model = SimpleCNN(args.num_classes)
     model.to(device)
 
-    if args.encode_image:
+    if args.remove_race:
         model_ae = torch.load(args.ae).to(device)
-        model_ae.eval()
     else:
-        model_ae = None
+        model_ae = torch.load(args.ae_vanilla).to(device)
+
+    model_ae.eval()
 
     e = Exp(args, X_train, X_test, X_val, y_train, y_test, y_val)
 
