@@ -253,7 +253,7 @@ class Trainer(object):
             self.best_loss = to_log['ae_loss']
             logger.info('Best reconstruction loss: %.5f' % self.best_loss)
             self.save_model('best_rec')
-        if self.params.eval_clf and np.mean(to_log['clf_accu']) > self.best_accu:
+        if self.params.n_lat_dis and self.params.eval_clf and np.mean(to_log['clf_accu']) > self.best_accu:
             self.best_accu = np.mean(to_log['clf_accu'])
             logger.info('Best evaluation accuracy: %.5f' % self.best_accu)
             self.save_model('best_accu')
