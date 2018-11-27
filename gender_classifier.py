@@ -58,6 +58,7 @@ class SimpleCNN(nn.Module):
         output = self.conv4_bn(self.conv4(output))
         output = self.relu4(output)
 
+        # print(output.shape)
         output = output.view(-1, 2 * 2 * 24)
 
         output = self.drop(self.fc(output))
@@ -241,7 +242,7 @@ if __name__ == '__main__':
                         help='Load and store data')
     parser.add_argument('--eval', action='store_true',
                         help='Load and store data')
-    parser.add_argument('--encode_image', action='store_true',
+    parser.add_argument('--encode-image', action='store_true',
                         help='Encode image to remove race info before passing to the classifier')
     parser.add_argument('--cuda', action='store_true',
                         help='Use CUDA')
@@ -313,8 +314,11 @@ if __name__ == '__main__':
     model = SimpleCNN(args.num_classes)
     model.to(device)
 
-    model_ae = torch.load(args.ae).to(device)
-    model_ae.eval()
+    if args.encode_image:
+        model_ae = torch.load(args.ae).to(device)
+        model_ae.eval()
+    else:
+        model_ae = None
 
     e = Exp(args, X_train, X_test, X_val, y_train, y_test, y_val)
 
@@ -340,7 +344,8 @@ if __name__ == '__main__':
         print('#' * 89)
         all_perf = np.array(all_perf)
         mean_perf = np.mean(all_perf, axis=0)
+        std_perf = np.std(all_perf, axis=0)
         for c in range(5):
-            print('For class ' + str(c) + ' Mean Accuracy = ' + str(mean_perf[c]))
+            print('For class ' + str(c) + ' Mean Accuracy = ' + str(mean_perf[c]) + '+/-' + str(std_perf[c]))
     else:
         e.run(model, model_ae)
