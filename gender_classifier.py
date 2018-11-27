@@ -21,7 +21,7 @@ class SimpleCNN(nn.Module):
     def __init__(self, num_classes=2):
         super(SimpleCNN, self).__init__()
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=12, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=512, out_channels=12, kernel_size=3, stride=1, padding=1)
         self.conv1_bn = nn.BatchNorm2d(12)
         self.relu1 = nn.LeakyReLU(0.2)
 
@@ -40,7 +40,7 @@ class SimpleCNN(nn.Module):
         self.conv4_bn = nn.BatchNorm2d(24)
         self.relu4 = nn.LeakyReLU(0.2)
 
-        self.fc = nn.Linear(in_features=128 * 128 * 24, out_features=num_classes)
+        self.fc = nn.Linear(in_features=2 * 2 * 24, out_features=num_classes)
         self.drop = nn.Dropout(0.5)
 
     def forward(self, input):
@@ -58,7 +58,7 @@ class SimpleCNN(nn.Module):
         output = self.conv4_bn(self.conv4(output))
         output = self.relu4(output)
 
-        output = output.view(-1, 128 * 128 * 24)
+        output = output.view(-1, 2 * 2 * 24)
 
         output = self.drop(self.fc(output))
         return output
@@ -190,7 +190,7 @@ class Exp():
 
             # Compute the average acc and loss over all 50000 training images
             print('Validation')
-            val_acc = self.evaluate(model, (self.X_val, self.y_val))
+            val_acc = self.evaluate(model, (self.X_val, self.y_val), model_ae)
             # Evaluate on the test set
             # test_acc = test()
 
@@ -212,7 +212,7 @@ class Exp():
         self.train(model, self.args.num_epochs, model_ae)
         print('Test')
         model = torch.load(open('model.pth', 'rb'))
-        self.evaluate(model, (self.X_test, self.y_test))
+        self.evaluate(model, (self.X_test, self.y_test), model_ae)
 
 
 if __name__ == '__main__':
