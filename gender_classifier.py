@@ -60,7 +60,7 @@ class SimpleCNN(nn.Module):
         output = self.relu4(output)
 
         # print(output.shape)
-        output = output.view(-1, 2 * 2 * 24)
+        output = output.view(-1, 2 * 2 * 8)
 
         output = self.drop(self.fc(output))
         return output
