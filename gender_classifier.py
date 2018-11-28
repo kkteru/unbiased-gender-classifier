@@ -122,7 +122,7 @@ class Exp():
 
     def evaluate(self, model, data, model_ae=None):
         model.eval()
-
+        model_ae.eval()
         X_test_ = data[0]
         y_test_ = data[1]
         test_acc = 0.0
@@ -157,6 +157,7 @@ class Exp():
         lr = self.args.lr
         for epoch in tqdm(range(num_epochs)):
             model.train()
+            model_ae.train()
             train_acc = 0.0
             train_loss = 0.0
 
@@ -248,10 +249,10 @@ if __name__ == '__main__':
                         help='Encode image to remove race info before passing to the classifier')
     parser.add_argument('--cuda', action='store_true',
                         help='Use CUDA')
-    parser.add_argument("--ae", type=str, default="./models/best_accu_ae.pth",
-                        help="Path to autoencoder model")
-    parser.add_argument("--ae_vanilla", type=str, default="./models/best_rec_ae.pth",
-                        help="Path to autoencoder model")
+    parser.add_argument("--ae", type=str, default="./models/ae_race_invariant.pth",
+                        help="Path to race invariant autoencoder model")
+    parser.add_argument("--ae_vanilla", type=str, default="./models/ae_vanilla.pth",
+                        help="Path to vanilla autoencoder model")
     # parser.add_argument('--out-dir', type=str, default='../data/wikitext-2/annotated',
     #                     help='location of the output directory')
 
@@ -323,7 +324,10 @@ if __name__ == '__main__':
     else:
         model_ae = torch.load(args.ae_vanilla).to(device)
 
-    model_ae.eval()
+    # model_ae.eval()
+
+    for params in model_ae.parameters():
+        params.requires_grad = False
 
     e = Exp(args, X_train, X_test, X_val, y_train, y_test, y_val)
 
