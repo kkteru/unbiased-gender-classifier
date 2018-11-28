@@ -82,7 +82,7 @@ class Exp():
         self.y_val = y_val
 
     def get_predictions(self, data):
-        model = torch.load(open(os.path.join(self.arg.name, 'model.pth'), 'rb')).to(device)
+        model = torch.load(open(os.path.join(self.args.name, 'model.pth'), 'rb')).to(device)
         model.eval()
 
         X_test_ = data
@@ -206,7 +206,7 @@ class Exp():
 
             # Save the model if the test acc is greater than our current best
             if val_acc >= best_acc:
-                torch.save(model, open(os.path.join(self.arg.name, 'model.pth'), 'wb'))
+                torch.save(model, open(os.path.join(self.args.name, 'model.pth'), 'wb'))
                 best_acc = val_acc
                 print('Saved model')
             else:
@@ -221,7 +221,7 @@ class Exp():
     def run(self, model, model_ae=None):
         self.train(model, self.args.num_epochs, model_ae)
         print('Test')
-        model = torch.load(open('model.pth', 'rb'))
+        model = torch.load(open(os.path.join(self.args.name, 'model.pth'), 'rb'))
         self.evaluate(model, (self.X_test, self.y_test), model_ae)
 
 
