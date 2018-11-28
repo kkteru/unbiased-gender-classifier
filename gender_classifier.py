@@ -17,6 +17,11 @@ def normalize_images(images):
     return images.float().div_(255.0).mul_(2.0).add_(-1)
 
 
+def weights_init(m):
+    if isinstance(m, nn.Conv2d):
+        torch.nn.init.xavier_uniform(m.weight.data)
+
+
 class SimpleCNN(nn.Module):
     def __init__(self, num_classes=2):
         super(SimpleCNN, self).__init__()
@@ -77,7 +82,7 @@ class Exp():
         self.y_val = y_val
 
     def get_predictions(self, data):
-        model = torch.load(open(self.args.model_loc, 'rb')).to(device)
+        model = torch.load(open(os.path.join(self.arg.name, 'model.pth'), 'rb')).to(device)
         model.eval()
 
         X_test_ = data
@@ -201,7 +206,7 @@ class Exp():
 
             # Save the model if the test acc is greater than our current best
             if val_acc >= best_acc:
-                torch.save(model, open('model.pth', 'wb'))
+                torch.save(model, open(os.path.join(self.arg.name, 'model.pth'), 'wb'))
                 best_acc = val_acc
                 print('Saved model')
             else:
@@ -222,9 +227,9 @@ class Exp():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Race Classifier')
-    parser.add_argument('--data', type=str, default='./data',
+    parser.add_argument('--name', type=str, default='default',
                         help='location of the data corpus')
-    parser.add_argument('--model-loc', type=str, default='./model.pth',
+    parser.add_argument('--data', type=str, default='./data',
                         help='location of the data corpus')
     parser.add_argument('--num-runs', type=int, default='1',
                         help='number of runs')
@@ -343,6 +348,7 @@ if __name__ == '__main__':
             print('*' * 89)
             print('Run ' + str(i + 1))
 
+            model.apply(weights_init)
             e.run(model, model_ae)
 
             print('-' * 89)
@@ -358,4 +364,5 @@ if __name__ == '__main__':
         for c in range(5):
             print('For class ' + str(c) + ' Mean Accuracy = ' + str(mean_perf[c]) + '+/-' + str(std_perf[c]))
     else:
+        model.apply(weights_init)
         e.run(model, model_ae)
