@@ -21,31 +21,32 @@ class SimpleCNN(nn.Module):
     def __init__(self, num_classes=2):
         super(SimpleCNN, self).__init__()
 
-        self.conv1 = nn.Conv2d(in_channels=512, out_channels=12, kernel_size=3, stride=1, padding=1)
-        self.conv1_bn = nn.BatchNorm2d(12)
+        self.conv1 = nn.Conv2d(in_channels=512, out_channels=128, kernel_size=3, stride=1, padding=1)
+        self.conv1_bn = nn.BatchNorm2d(128)
         self.relu1 = nn.LeakyReLU(0.2)
+        self.drop1 = nn.Dropout(0.5)
 
-        self.conv2 = nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1)
-        self.conv2_bn = nn.BatchNorm2d(12)
+        self.conv2 = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv2_bn = nn.BatchNorm2d(64)
         self.relu2 = nn.LeakyReLU(0.2)
 
         self.pool = nn.MaxPool2d(kernel_size=2)
 
-        self.conv3 = nn.Conv2d(in_channels=12, out_channels=24, kernel_size=3, stride=1, padding=1)
-        self.conv3_bn = nn.BatchNorm2d(24)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv3_bn = nn.BatchNorm2d(16)
         self.relu3 = nn.LeakyReLU(0.2)
-        self.drop3 = nn.Dropout(0.1)
+        self.drop3 = nn.Dropout(0.3)
 
-        self.conv4 = nn.Conv2d(in_channels=24, out_channels=24, kernel_size=3, stride=1, padding=1)
-        self.conv4_bn = nn.BatchNorm2d(24)
+        self.conv4 = nn.Conv2d(in_channels=16, out_channels=8, kernel_size=3, stride=1, padding=1)
+        self.conv4_bn = nn.BatchNorm2d(8)
         self.relu4 = nn.LeakyReLU(0.2)
 
-        self.fc = nn.Linear(in_features=2 * 2 * 24, out_features=num_classes)
-        self.drop = nn.Dropout(0.5)
+        self.fc = nn.Linear(in_features=2 * 2 * 8, out_features=num_classes)
+        self.drop = nn.Dropout(0.1)
 
     def forward(self, input):
         output = self.conv1_bn(self.conv1(input))
-        output = self.relu1(output)
+        output = self.drop1(self.relu1(output))
 
         output = self.conv2_bn(self.conv2(output))
         output = self.relu2(output)
