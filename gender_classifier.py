@@ -264,6 +264,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if not os.path.exists(args.name):
+        os.makedirs(args.name)
+
     images = torch.load(os.path.join(args.data, 'images_256_256.pth'))
     print('Shape of images loaded : ' + str(images.shape))
     attributes = torch.load(os.path.join(args.data, 'attributes.pth'))
