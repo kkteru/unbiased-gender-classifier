@@ -1,6 +1,6 @@
 # Reducing bias in classifiers by disentangling the input attributes
 
-
+![Alt text](overview.png?raw=true "Title")
 
 Getting started
 -------------
