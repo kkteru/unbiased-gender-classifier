@@ -26,7 +26,7 @@ parser.add_argument("--n_images", type=int, default=10,
                     help="Number of images to modify")
 parser.add_argument("--offset", type=int, default=0,
                     help="First image index")
-parser.add_argument("--n_interpolations", type=int, default=10,
+parser.add_argument("--n_interpolations", type=int, default=5,
                     help="Number of interpolations per image")
 parser.add_argument("--alpha_min", type=float, default=1,
                     help="Min interpolation value")
@@ -56,8 +56,8 @@ params.h_flip = False
 params.img_sz = ae.img_sz
 params.attr = ae.attr
 params.n_attr = ae.n_attr
-if not (len(params.attr) == 1 and params.n_attr == 2):
-    raise Exception("The model must use a single boolean attribute only.")
+# if not (len(params.attr) == 1 and params.n_attr == 2):
+#     raise Exception("The model must use a single boolean attribute only.")
 
 # load dataset
 data, attributes = load_images(params)
