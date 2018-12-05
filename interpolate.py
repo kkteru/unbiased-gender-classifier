@@ -72,15 +72,16 @@ def get_interpolations(ae, images, attributes, params):
     enc_outputs = ae.encode(images)
 
     # interpolation values
-    alphas = np.linspace(1 - params.alpha_min, params.alpha_max, params.n_interpolations)
-    alphas = [torch.FloatTensor([1 - alpha, alpha]) for alpha in alphas]
+    # alphas = np.linspace(1 - params.alpha_min, params.alpha_max, params.n_interpolations)
+    # alphas = [torch.FloatTensor([1 - alpha, alpha]) for alpha in alphas]
+    alphas = torch.eye(5)
 
     # original image / reconstructed image / interpolations
     outputs = []
     outputs.append(images)
     outputs.append(ae.decode(enc_outputs, attributes)[-1])
     for alpha in alphas:
-        alpha = Variable(alpha.unsqueeze(0).expand((len(images), 2)).cuda())
+        alpha = Variable(alpha.unsqueeze(0).expand((len(images), 5)).cuda())
         outputs.append(ae.decode(enc_outputs, alpha)[-1])
 
     # return stacked images
