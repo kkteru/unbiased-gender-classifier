@@ -243,7 +243,7 @@ if __name__ == '__main__':
                         help='batch size')
     parser.add_argument('--num-epochs', type=int, default='50',
                         help='batch size')
-    parser.add_argument('--gpu', type=int, default='1',
+    parser.add_argument('--gpu', type=int, default='0',
                         help='gpu id')
     parser.add_argument('--lr', type=float, default='0.001',
                         help='learning rate')
